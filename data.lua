@@ -7,6 +7,9 @@ local burner_offshore_pump = table.deepcopy(data.raw["offshore-pump"]["offshore-
 burner_offshore_pump.name = "burner-offshore-pump"
 burner_offshore_pump.minable = {mining_time = 0.1, result = "burner-offshore-pump"}
 
+-- Add brown tint to burner pump
+burner_offshore_pump.tint = {r = 0.6, g = 0.4, b = 0.2, a = 1.0}
+
 -- Add energy source for burner pump
 burner_offshore_pump.energy_source = {
   type = "burner",
@@ -36,6 +39,9 @@ burner_offshore_pump.energy_usage = "30kW"
 local electric_offshore_pump = table.deepcopy(data.raw["offshore-pump"]["offshore-pump"])
 electric_offshore_pump.name = "electric-offshore-pump"
 electric_offshore_pump.minable = {mining_time = 0.1, result = "electric-offshore-pump"}
+
+-- Add bright yellow tint to electric pump
+electric_offshore_pump.tint = {r = 1.0, g = 1.0, b = 0.0, a = 1.0}
 
 -- Add energy source for electric pump
 electric_offshore_pump.energy_source = {
@@ -87,12 +93,11 @@ data:extend({
     energy_required = 0.5,
     ingredients = {
       {type = "item", name = "iron-gear-wheel", amount = 2},
-      {type = "item", name = "iron-stick", amount = 2},
-      {type = "item", name = "iron-plate", amount = 2},
+      {type = "item", name = "pipe", amount = 3},
       {type = "item", name = "stone-furnace", amount = 1}
     },
     results = {{type = "item", name = "burner-offshore-pump", amount = 1}}, -- Updated results format for 2.0
-    enabled = true
+    enabled = false -- Changed to false, will be unlocked by steam power research
   },
   {
     type = "recipe",
@@ -100,8 +105,7 @@ data:extend({
     energy_required = 2,
     ingredients = {
       {type = "item", name = "iron-gear-wheel", amount = 2},
-      {type = "item", name = "iron-stick", amount = 2},
-      {type = "item", name = "iron-plate", amount = 2},
+      {type = "item", name = "pipe", amount = 3},
       {type = "item", name = "engine-unit", amount = 1}
     },
     results = {{type = "item", name = "electric-offshore-pump", amount = 1}}, -- Updated results format for 2.0
@@ -117,12 +121,20 @@ if data.raw["technology"]["engine"] and data.raw["technology"]["engine"].effects
   })
 end
 
+-- Add burner pump to steam power technology
+if data.raw["technology"]["steam-power"] and data.raw["technology"]["steam-power"].effects then
+  table.insert(data.raw["technology"]["steam-power"].effects, {
+    type = "unlock-recipe",
+    recipe = "burner-offshore-pump"
+  })
+end
+
 -- Remove original offshore pump recipe (make burner the default)
 if data.raw["recipe"]["offshore-pump"] then
   data.raw["recipe"]["offshore-pump"] = nil
 end
 
--- Replace original offshore pump with burner version in existing recipes/technologies
+-- Remove original offshore pump from steam power research and replace with burner version
 for _, technology in pairs(data.raw.technology or {}) do
   if technology.effects then
     for _, effect in pairs(technology.effects) do
