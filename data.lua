@@ -127,6 +127,15 @@ end
 
 -- Add burner pump to steam power technology
 if data.raw["technology"]["steam-power"] and data.raw["technology"]["steam-power"].effects then
+  -- Remove original offshore pump from steam power research
+  for i, effect in ipairs(data.raw["technology"]["steam-power"].effects) do
+    if effect.type == "unlock-recipe" and effect.recipe == "offshore-pump" then
+      table.remove(data.raw["technology"]["steam-power"].effects, i)
+      break
+    end
+  end
+  
+  -- Add burner pump to steam power research
   table.insert(data.raw["technology"]["steam-power"].effects, {
     type = "unlock-recipe",
     recipe = "burner-offshore-pump"
