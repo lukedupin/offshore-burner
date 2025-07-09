@@ -10,13 +10,13 @@ burner_offshore_pump.minable = {mining_time = 0.1, result = "burner-offshore-pum
 -- Add brown tint to burner pump
 burner_offshore_pump.tint = {r = 0.6, g = 0.4, b = 0.2, a = 1.0}
 
--- Add energy source for burner pump
+-- Add energy source for burner pump with energy buffer
 burner_offshore_pump.energy_source = {
   type = "burner",
-  fuel_categories = {"chemical"}, -- Changed from fuel_category to fuel_categories (array)
+  fuel_categories = {"chemical"},
   effectivity = 1,
   fuel_inventory_size = 1,
-  emissions_per_minute = {pollution = 10}, -- Updated emissions format for 2.0
+  emissions_per_minute = {pollution = 10},
   light_flicker = {
     color = {0.5, 0.5, 0.5},
     minimum_intensity = 0.6,
@@ -33,7 +33,10 @@ burner_offshore_pump.energy_source = {
     }
   }
 }
-burner_offshore_pump.energy_usage = "30kW"
+burner_offshore_pump.energy_usage = "900kW"
+burner_offshore_pump.pumping_speed = 5
+-- Add energy buffer to force consumption
+burner_offshore_pump.energy_buffer = "900kJ"
 
 -- Create electric offshore pump
 local electric_offshore_pump = table.deepcopy(data.raw["offshore-pump"]["offshore-pump"])
@@ -49,7 +52,8 @@ electric_offshore_pump.energy_source = {
   usage_priority = "secondary-input",
   emissions_per_minute = {pollution = 0} -- Updated emissions format for 2.0
 }
-electric_offshore_pump.energy_usage = "100kW"
+electric_offshore_pump.energy_usage = "450kW"
+electric_offshore_pump.pumping_speed = 20 -- Set explicit pumping speed
 
 -- Add both pumps to the game
 data:extend({
