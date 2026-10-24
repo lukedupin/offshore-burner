@@ -34,9 +34,22 @@ burner_offshore_pump.energy_source = {
   }
 }
 burner_offshore_pump.energy_usage = "900kW"
-burner_offshore_pump.pumping_speed = 5
+burner_offshore_pump.pumping_speed = 2
 -- Add energy buffer to force consumption
 burner_offshore_pump.energy_buffer = "900kJ"
+
+-- Create combustion offshore pump (the former burner pump stats)
+local combustion_offshore_pump = table.deepcopy(data.raw["offshore-pump"]["offshore-pump"])
+combustion_offshore_pump.name = "combustion-offshore-pump"
+combustion_offshore_pump.minable = {mining_time = 0.1, result = "combustion-offshore-pump"}
+
+-- Add dark red tint to combustion pump
+combustion_offshore_pump.tint = {r = 0.7, g = 0.3, b = 0.25, a = 1.0}
+
+combustion_offshore_pump.energy_source = table.deepcopy(burner_offshore_pump.energy_source)
+combustion_offshore_pump.energy_usage = "900kW"
+combustion_offshore_pump.pumping_speed = 7.5
+combustion_offshore_pump.energy_buffer = "900kJ"
 
 -- Create electric offshore pump
 local electric_offshore_pump = table.deepcopy(data.raw["offshore-pump"]["offshore-pump"])
@@ -58,6 +71,7 @@ electric_offshore_pump.pumping_speed = 20 -- Set explicit pumping speed
 -- Add both pumps to the game
 data:extend({
   burner_offshore_pump,
+  combustion_offshore_pump,
   electric_offshore_pump
 })
 
@@ -74,6 +88,18 @@ data:extend({
     stack_size = 20,
     weight = 20000, -- Added weight for 2.0
     default_import_location = "nauvis" -- Added for 2.0 space age compatibility
+  },
+  {
+    type = "item",
+    name = "combustion-offshore-pump",
+    icon = "__base__/graphics/icons/offshore-pump.png",
+    icon_size = 64,
+    subgroup = "energy-pipe-distribution",
+    order = "b[pipe]-c[offshore-pump]-aa[combustion]",
+    place_result = "combustion-offshore-pump",
+    stack_size = 20,
+    weight = 20000,
+    default_import_location = "nauvis"
   },
   {
     type = "item",
@@ -105,21 +131,41 @@ data:extend({
   },
   {
     type = "recipe",
-    name = "electric-offshore-pump",
+    name = "combustion-offshore-pump",
     energy_required = 2,
     ingredients = {
       {type = "item", name = "iron-gear-wheel", amount = 2},
       {type = "item", name = "pipe", amount = 3},
       {type = "item", name = "engine-unit", amount = 1}
     },
+    results = {{type = "item", name = "combustion-offshore-pump", amount = 1}},
+    enabled = false
+  },
+  {
+    type = "recipe",
+    name = "electric-offshore-pump",
+    energy_required = 2,
+    ingredients = {
+      {type = "item", name = "iron-gear-wheel", amount = 2},
+      {type = "item", name = "pipe", amount = 5},
+      {type = "item", name = "electric-engine-unit", amount = 2}
+    },
     results = {{type = "item", name = "electric-offshore-pump", amount = 1}}, -- Updated results format for 2.0
     enabled = false
   }
 })
 
--- Safely add electric pump to engine technology
+-- Unlock combustion pump with the internal combustion engine research
 if data.raw["technology"]["engine"] and data.raw["technology"]["engine"].effects then
   table.insert(data.raw["technology"]["engine"].effects, {
+    type = "unlock-recipe",
+    recipe = "combustion-offshore-pump"
+  })
+end
+
+-- Unlock electric pump with the electric engine (electric motor) research
+if data.raw["technology"]["electric-engine"] and data.raw["technology"]["electric-engine"].effects then
+  table.insert(data.raw["technology"]["electric-engine"].effects, {
     type = "unlock-recipe",
     recipe = "electric-offshore-pump"
   })
